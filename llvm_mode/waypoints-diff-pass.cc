@@ -106,9 +106,11 @@ public:
           
         bool at_top_of_llvmfuzz = false; 
         if (F.hasName()){
+          llvm::outs() << "Processing function: " << F.getName() << "\n";
           if (F.getName() == "LLVMFuzzerTestOneInput") {
             at_top_of_llvmfuzz = true;
             for (auto &BB : F) {
+              llvm::outs() << "Processing basic block: " << BB.getName() << "\n";
               for (auto &I : BB) {
                 if (ReturnInst *ri = dyn_cast<ReturnInst>(&I)) {
                   auto irb = insert_before(I);
@@ -117,6 +119,11 @@ public:
               }
             }
           }
+        }
+
+        if (F.begin() == F.end()) {
+            llvm::outs() << "Function has no basic blocks, skipping insertion\n";
+            return;
         }
 
         if (at_top_of_llvmfuzz) {
